@@ -75,6 +75,15 @@ void ray_box_intersection(Ray ray, AABB box, out float t_0, out float t_1)
     t_1 = min(t.x, t.y);
 }
 
+// A very simple colour transfer function
+vec4 colour_transfer(float intensity)
+{
+    vec3 high = vec3(1.0, 1.0, 1.0);
+    vec3 low = vec3(0.0, 0.0, 0.0);
+    float alpha = (exp(intensity) - 1.0) / (exp(1.0) - 1.0);
+    return vec4(intensity * high + (1.0 - intensity) * low, alpha);
+}
+
 void main()
 {
     vec3 ray_direction;
@@ -96,77 +105,47 @@ void main()
     vec3 step_vector = step_length * ray / ray_length;
 
     // Random jitter
-    ray_start += step_vector;// * texture(jitter, gl_FragCoord.xy / viewport_size).r;
+    //ray_start += step_vector * texture(jitter, gl_FragCoord.xy / viewport_size).r;
 
     vec3 position = ray_start;
-    vec3 colour = pow(background_colour, vec3(gamma));
+
+    float maximum_intensity = 0.0;
 
     // Ray march until reaching the end of the volume
-    float intensity = texture(volume, position).r;
-    /*
-    if (ray_length > 0)
-    {
-        a_color = vec4(1.0,0,0,1);
-    }
-    else
-    {
-        a_color = vec4(1,1,1,1);
-    }
-    */
-    a_color = vec4(0.0,1,0,1);
     while (ray_length > 0) {
 
         float intensity = texture(volume, position).r;
 
+        /*
         if (position.x < 0 || position.y < 0 || position.z < 0)
         {
-            //a_color = vec4(1,0,0,1);
-            //return;
+            a_color = vec4(1,0,0,1);
+            return;
         }
         
 
         if (position.x > 1 || position.y > 1 || position.z > 1)
         {
-            //a_color = vec4(0,1,0,1);
-            //return;
+            a_color = vec4(0,1,0,1);
+            return;
         }
+        */
 
-        if (intensity > threshold) {
-            // Get closer to the surface
-            position -= step_vector * 0.5;
-            intensity = texture(volume, position).r;
-            position -= step_vector * (intensity > threshold ? 0.25 : -0.25);
-            intensity = texture(volume, position).r;
-
-            
-            // Blinn-Phong shading
-            vec3 L = normalize(light_position - position);
-            vec3 V = -normalize(ray);
-            vec3 N = normal(position, intensity);
-            vec3 H = normalize(L + V);
-
-            float Ia = 0.1;
-            float Id = 1.0 * max(0, dot(N, L));
-            float Is = 8.0 * pow(max(0, dot(N, H)), 600);
-            colour = (Ia + Id) * material_colour + Is * vec3(1.0);
-            
-            //colour = material_colour * intensity;
-
-            break;
+        if (intensity > maximum_intensity) {
+            maximum_intensity = intensity;
         }
 
         ray_length -= step_length;
         position += step_vector;
     }
-    
-    // Gamma correction
-    a_color.rgb = pow(colour, vec3(1.0 / gamma));
+
+    vec4 colour = colour_transfer(maximum_intensity);
+
+    // Blend background
+    a_color.rgb = colour.a * colour.rgb + (1 - colour.a) * pow(background_colour, vec3(gamma)).rgb;
     a_color.a = 1.0;
-    //intensity = texture(volume, vec3(1,0,1)).r;
-    //a_color.rgba = vec4(intensity, intensity, intensity, 1.0);
-    
-    //float inten = texture(volume, vec3(0,0,0.55)).r;
-    //a_color = vec4(position.x, position.y, position.z, 1.0);
-    
-    // a_color = vec4(1, 0, 0, 0.1);
+
+    // Gamma correction
+    a_color.rgb = pow(colour.rgb, vec3(1.0 / gamma));
+    a_color.a = colour.a;
 }

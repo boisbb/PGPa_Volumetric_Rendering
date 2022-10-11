@@ -8,6 +8,7 @@
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
 #include "Texture.h"
+#include "VolumeTexture.h"
 #include "Camera.h"
 #include "UnitCube.h"
 
@@ -32,12 +33,19 @@ namespace test_model {
 
         //std::unique_ptr<Model> m_Cube;
         std::unique_ptr<UnitCube> m_UnitCube;
+        std::unique_ptr<VolumeTexture> m_VolumeTexture;
 
-        glm::vec3 lightPos = glm::vec3(0.0f,10.0f,10.0f);
+        glm::vec3 lightPos = glm::vec3(1.5f,0.0f,1.5f);
         glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
         float lightStrength = 0.5f;
 
+        float intensityThresh = 0.4;
+        float stepLen = 0.05;
+        float gamma = 0.02;
+
         int WIDTH;
         int HEIGHT;
+
+        GLuint vbo;
     };
 }

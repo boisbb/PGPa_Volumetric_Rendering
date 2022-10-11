@@ -71,6 +71,20 @@ void Shader::SetUniform1i(const std::string& name, int value)
 
 
 /**
+ * @brief Set the shader uniform - 2 float vector.
+ * 
+ * @param name 
+ * @param v0 
+ * @param v1 
+ * @param v2 
+ */
+void Shader::SetUniform2f(const std::string& name, float v0, float v1) 
+{
+  	glUniform2f(GetUniformLocation(name), v0, v1);
+}
+
+
+/**
  * @brief Set the shader uniform - 3 float vector.
  * 
  * @param name 

@@ -6,7 +6,7 @@ project ( VolumeRendering
 )
 
 # Set to c++14
-set ( CMAKE_CXX_STANDARD 14 )
+set ( CMAKE_CXX_STANDARD 17 )
 
 # Source
 set ( SOURCE
@@ -20,6 +20,8 @@ set ( SOURCE
   src/vendor/imgui/libs/imgui/backends/imgui_impl_opengl3.cpp
   src/vendor/stb_image/stb_image.h
   src/vendor/stb_image/stb_image.cpp
+  src/vendor/stb_image/stb_image_write.h
+  src/vendor/stb_image/stb_image_write.cpp
   src/models/TestModel.cpp
   src/models/TestModel.h
   src/models/VolumeRendering.cpp
@@ -35,6 +37,8 @@ set ( SOURCE
   src/graphics/Renderer.h
   src/graphics/Shader.cpp
   src/graphics/Shader.h
+  src/objects/VolumeTexture.cpp
+  src/objects/VolumeTexture.h
   src/objects/Texture.cpp
   src/objects/Texture.h
   src/graphics/VertexArray.cpp

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <iostream>
+#include <math.h>
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
@@ -25,7 +26,6 @@
 Camera::Camera(int width, int height, glm::vec3 position, glm::vec3 orientation, glm::vec3 up)
     : c_Width(width), c_Height(height), c_Position(position), c_Orientation(orientation), c_Up(up)
 {
-    
 }
 
 Camera::~Camera() 
@@ -45,11 +45,13 @@ void Camera::updateMatrix(float FOVdeg, float nearPlane, float farPlane)
     c_View = glm::mat4(1.0f);
     c_Projection = glm::mat4(1.0f);
 
-    c_View = glm::lookAt(c_Position, c_Position + c_Orientation, c_Up);
+    // c_View = glm::lookAt(c_Position, c_Position + c_Orientation, c_Up);
+    c_View = glm::lookAt(c_Position, glm::vec3(0,0,0), c_Up);
     c_Projection = glm::perspective(glm::radians(FOVdeg), (float)c_Width / c_Height, nearPlane, farPlane);
 
     
     c_Matrix = c_Projection * c_View;
+    c_FocalLength = 1.0 / tan(M_PI / 180.0 * FOVdeg / 2.0);
 }
 
 /**
@@ -67,13 +69,13 @@ void Camera::Input(GLFWwindow* window)
         c_Position += c_Speed * c_Orientation;
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
-        c_Position += c_Speed * -glm::normalize(glm::cross(c_Orientation, c_Up));
+        //c_Position += c_Speed * -glm::normalize(glm::cross(c_Orientation, c_Up));
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
         c_Position += c_Speed * -c_Orientation;
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
-        c_Position += c_Speed * glm::normalize(glm::cross(c_Orientation, c_Up));
+        //c_Position += c_Speed * glm::normalize(glm::cross(c_Orientation, c_Up));
     }
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS){
         c_Position += c_Speed * c_Up;
@@ -105,6 +107,10 @@ void Camera::Input(GLFWwindow* window)
         float rotx = sensitivity * (float)(mouseY - (c_Height / 2)) / c_Height;
         float roty = sensitivity * (float)(mouseX - (c_Width / 2)) / c_Width;
 
+        c_Position = glm::rotate(c_Position, glm::radians(-rotx), glm::vec3(1,0,0));
+        c_Position = glm::rotate(c_Position, glm::radians(roty), glm::vec3(0,1,0));
+
+        /*
         glm::vec3 newOrientation = glm::rotate(c_Orientation, glm::radians(-rotx), glm::normalize(glm::cross(c_Orientation, c_Up)));
 
         if (!((glm::angle(newOrientation, c_Up) <= glm::radians(0.5f)) || (glm::angle(newOrientation, -c_Up) <= glm::radians(5.0f))))
@@ -113,6 +119,7 @@ void Camera::Input(GLFWwindow* window)
         }
 
         c_Orientation = glm::rotate(c_Orientation, glm::radians(-roty), c_Up);
+        */
 
         glfwSetCursorPos(window, (c_Width / 2), (c_Height / 2));
         
