@@ -123,6 +123,17 @@ void Shader::SetUniformMat1i(const std::string& name, const int* value)
   	glUniform1iv(GetUniformLocation(name), 2, value);
 }
 
+/**
+ * @brief Set the shader uniform - mat4 of floats.
+ * 
+ * @param name 
+ * @param matrix 
+ */
+void Shader::SetUniformMat3f(const std::string& name, const glm::mat3& matrix) 
+{
+  	glUniformMatrix3fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0]);
+}
+
 
 /**
  * @brief Set the shader uniform - mat4 of floats.

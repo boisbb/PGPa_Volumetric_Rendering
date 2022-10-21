@@ -102,55 +102,38 @@ void main()
     vec3 colour = pow(background_colour, vec3(gamma));
 
     // Ray march until reaching the end of the volume
-    float intensity = texture(volume, position).r;
-    /*
-    if (ray_length > 0)
-    {
-        a_color = vec4(1.0,0,0,1);
-    }
-    else
-    {
-        a_color = vec4(1,1,1,1);
-    }
-    */
-    a_color = vec4(0.0,1,0,1);
     while (ray_length > 0) {
-
-        float intensity = texture(volume, position).r;
-
-        if (position.x < 0 || position.y < 0 || position.z < 0)
-        {
-            //a_color = vec4(1,0,0,1);
-            //return;
-        }
-        
-
-        if (position.x > 1 || position.y > 1 || position.z > 1)
-        {
-            //a_color = vec4(0,1,0,1);
-            //return;
-        }
+        // inverting the texture cuz of some OpenGL funny business
+        vec3 posInv = position;
+        posInv.xy = 1 - posInv.xy;
+        float intensity = texture(volume, posInv).r;
 
         if (intensity > threshold) {
+
             // Get closer to the surface
             position -= step_vector * 0.5;
-            intensity = texture(volume, position).r;
-            position -= step_vector * (intensity > threshold ? 0.25 : -0.25);
-            intensity = texture(volume, position).r;
+            posInv = position;
+            posInv.xy = 1 - posInv.xy;
 
-            
+            intensity = texture(volume, posInv).r;
+            position -= step_vector * (intensity > threshold ? 0.25 : -0.25);
+            posInv = position;
+            posInv.xy = 1 - posInv.xy;
+            intensity = texture(volume, posInv).r;
+
             // Blinn-Phong shading
             vec3 L = normalize(light_position - position);
             vec3 V = -normalize(ray);
-            vec3 N = normal(position, intensity);
+            vec3 N = normal(posInv, intensity);
             vec3 H = normalize(L + V);
 
             float Ia = 0.1;
             float Id = 1.0 * max(0, dot(N, L));
             float Is = 8.0 * pow(max(0, dot(N, H)), 600);
             colour = (Ia + Id) * material_colour + Is * vec3(1.0);
-            
-            //colour = material_colour * intensity;
+
+            if (position.x < 0.0f || position.y < 0.0f || position.z < 0.0f)
+                colour = vec3(1,0,0); 
 
             break;
         }
@@ -158,15 +141,9 @@ void main()
         ray_length -= step_length;
         position += step_vector;
     }
-    
+
     // Gamma correction
+    //a_color.rgb = colour;
     a_color.rgb = pow(colour, vec3(1.0 / gamma));
-    a_color.a = 1.0;
-    //intensity = texture(volume, vec3(1,0,1)).r;
-    //a_color.rgba = vec4(intensity, intensity, intensity, 1.0);
-    
-    //float inten = texture(volume, vec3(0,0,0.55)).r;
-    //a_color = vec4(position.x, position.y, position.z, 1.0);
-    
-    // a_color = vec4(1, 0, 0, 0.1);
+    a_color.a = 1.0f;
 }

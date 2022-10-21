@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <memory>
+#include "glm/mat4x4.hpp"
 
 #include "TestModel.h"
 #include "VertexBuffer.h"
@@ -39,9 +40,9 @@ namespace test_model {
         glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
         float lightStrength = 0.5f;
 
-        float intensityThresh = 0.4;
-        float stepLen = 0.05;
-        float gamma = 0.02;
+        float intensityThresh = 0.3;
+        float stepLen = 0.001;
+        float gamma = 0.4;
 
         int WIDTH;
         int HEIGHT;

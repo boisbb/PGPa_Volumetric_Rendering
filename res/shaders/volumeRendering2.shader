@@ -140,12 +140,14 @@ void main()
     }
 
     vec4 colour = colour_transfer(maximum_intensity);
+    a_color = colour;
+    a_color.a = 1.0;
 
-    // Blend background
+    //Blend background;
     a_color.rgb = colour.a * colour.rgb + (1 - colour.a) * pow(background_colour, vec3(gamma)).rgb;
     a_color.a = 1.0;
 
     // Gamma correction
-    a_color.rgb = pow(colour.rgb, vec3(1.0 / gamma));
+    a_color.rgb = pow(a_color.rgb, vec3(1.0 / gamma));
     a_color.a = colour.a;
 }

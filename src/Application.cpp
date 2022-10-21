@@ -28,7 +28,7 @@ http://docs.gl/
 #include "models/TestModel.h"
 #include "models/VolumeRendering.h"
 
-int WIDTH = 1200;
+int WIDTH = 800;
 int HEIGHT = 800;
 
 

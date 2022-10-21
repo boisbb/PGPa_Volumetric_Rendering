@@ -13,26 +13,25 @@
 namespace test_model
 {
     VolumeRendering::VolumeRendering(GLFWwindow* window, int width, int height)
-        : m_ClearColor {0.0f, 0.0f, 0.0f, 1.0f}, WIDTH(width), HEIGHT(height), m_Window(window)             
+        : m_ClearColor {0.1f, 0.1f, 0.1f, 1.0f}, WIDTH(width), HEIGHT(height), m_Window(window)             
     {
-        // glDisable(GL_DEPTH_TEST);
-        // glEnable(GL_BLEND);
-        // glEnable(GL_CULL_FACE);
-        // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glEnable(GL_CULL_FACE);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         glm::vec3 camPos = glm::vec3(0, 0,4);
         m_Camera = std::make_unique<Camera>(WIDTH, HEIGHT, camPos,
                                             glm::vec3(0, 0, 1),
                                             glm::vec3(0, 1, 0));
-        m_SimpleShader = std::make_unique<Shader>("../res/shaders/volumeRendering2.shader");
+        m_SimpleShader = std::make_unique<Shader>("../res/shaders/volumeRendering.shader");
 
         m_UnitCube = std::make_unique<UnitCube>();
         //m_VolumeTexture = std::make_unique<VolumeTexture>("../res/textures/sample_data", glm::vec3(VOLUME_W, VOLUME_H, VOLUME_D));
         m_VolumeTexture = std::make_unique<VolumeTexture>("../res/textures/head256x256x109", glm::vec3(VOLUME_W, VOLUME_H, 108), true);
 
-        std::cout << (float)NORM_D <<std::endl;
         m_UnitCube->SetModelMatrix(glm::scale(m_UnitCube->GetModelMatrix(), glm::vec3(NORM_W, NORM_H, NORM_D)));
-
+        //m_UnitCube->SetModelMatrix(glm::rotate(m_UnitCube->GetModelMatrix(), 3.14f, glm::vec3(1,0,0)));
         //m_Cube = std::make_unique<Model>("../res/models/box/box.obj");
     }
 
@@ -61,22 +60,13 @@ namespace test_model
         glm::mat4 camMetrix = m_Camera->GetMatrix();
         glm::mat4 modelMatrix = m_UnitCube->GetModelMatrix();
         glm::vec3 eye = m_Camera->GetPosition();
-        glm::mat4 modelView = view * modelMatrix;
-        glm::mat4 normal = glm::transpose(glm::inverse(modelView));
-        // TODO: IS THIS ONE CORRECT?
-        //glm::vec4 rayOrigin = glm::inverse(view) * glm::vec4(0,0,0,0);
-        //glm::vec4 rayOrigin = modelView * glm::vec4(viewPos.x, viewPos.y, viewPos.z, 1.0);
-        /*
-        std::cout << "Ray origin" << std::endl;
-        std::cout << rayOrigin.x << " " << rayOrigin.y << " " << rayOrigin.z << " " << rayOrigin.w << std::endl;
-        */
-        //std::cout << "Camera position" << std::endl;
-        //std::cout << viewPos.x << " " << viewPos.y << " " << viewPos.z << std::endl;
-
+        glm::mat4 modelView = modelMatrix * view;
+        glm::mat3 modelView3x3 = glm::mat3(modelView);
+        glm::mat3 normal = glm::transpose(glm::inverse(modelView3x3));
 
         m_SimpleShader->Bind();
         m_SimpleShader->SetUniformMat4f("ViewMatrix", view);
-        m_SimpleShader->SetUniformMat4f("NormalMatrix", normal);
+        m_SimpleShader->SetUniformMat3f("NormalMatrix", normal);
         m_SimpleShader->SetUniform1f("focal_length", m_Camera->GetFocalLength());
         m_SimpleShader->SetUniform1f("aspect_ratio", WIDTH / HEIGHT);
         m_SimpleShader->SetUniform2f("viewport_size", WIDTH, HEIGHT);
@@ -86,7 +76,7 @@ namespace test_model
         // m_SimpleShader->SetUniform3f("top", 1, 1,1);
         // m_SimpleShader->SetUniform3f("bottom", -1,-1,-1);
         m_SimpleShader->SetUniform3f("background_colour", m_ClearColor[0], m_ClearColor[1], m_ClearColor[2]);
-        m_SimpleShader->SetUniform3f("material_colour", 255.0, 255.0, 255.0);
+        m_SimpleShader->SetUniform3f("material_colour", 1.0, 1.0, 1.0);
         m_SimpleShader->SetUniform3f("light_position", lightPos.x, lightPos.y, lightPos.z);
         m_SimpleShader->SetUniform1f("step_length", stepLen);
         m_SimpleShader->SetUniform1f("threshold", intensityThresh);
@@ -117,8 +107,8 @@ namespace test_model
         {
             ImGui::Indent();
             ImGui::SliderFloat("Threshold", &intensityThresh, 0.0, 1.0);
-            ImGui::SliderFloat("Step Lenght", &stepLen, 0.0, 1.0);
-            ImGui::SliderFloat("Gamma", &gamma, 0.0, 1.0);
+            ImGui::SliderFloat("Step Lenght", &stepLen, 0.001, 1.0);
+            ImGui::SliderFloat("Gamma", &gamma, 0.001, 2.0);
             ImGui::Unindent();
         }
     }
