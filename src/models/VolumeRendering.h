@@ -12,6 +12,7 @@
 #include "VolumeTexture.h"
 #include "Camera.h"
 #include "UnitCube.h"
+#include "TransferFunction.h"
 
 namespace test_model {
     class VolumeRendering : public TestModel
@@ -35,6 +36,11 @@ namespace test_model {
         //std::unique_ptr<Model> m_Cube;
         std::unique_ptr<UnitCube> m_UnitCube;
         std::unique_ptr<VolumeTexture> m_VolumeTexture;
+        std::unique_ptr<TransferFunction> m_TransferFunc;
+        
+        // light testing
+        std::unique_ptr<UnitCube> m_LightCube;
+        std::unique_ptr<Shader> m_LightShader;
 
         glm::vec3 lightPos = glm::vec3(1.5f,0.0f,1.5f);
         glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);

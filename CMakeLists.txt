@@ -41,6 +41,8 @@ set ( SOURCE
   src/objects/VolumeTexture.h
   src/objects/Texture.cpp
   src/objects/Texture.h
+  src/objects/TransferFunction.cpp
+  src/objects/TransferFunction.h
   src/graphics/VertexArray.cpp
   src/graphics/VertexArray.h
   src/graphics/VertexBuffer.cpp

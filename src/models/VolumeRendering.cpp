@@ -20,19 +20,19 @@ namespace test_model
         glEnable(GL_CULL_FACE);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        glm::vec3 camPos = glm::vec3(0, 0,4);
+        glm::vec3 camPos = glm::vec3(0, 0, 4);
         m_Camera = std::make_unique<Camera>(WIDTH, HEIGHT, camPos,
-                                            glm::vec3(0, 0, 1),
+                                            glm::vec3(0, 0, -1),
                                             glm::vec3(0, 1, 0));
-        m_SimpleShader = std::make_unique<Shader>("../res/shaders/volumeRendering.shader");
-
+        m_SimpleShader = std::make_unique<Shader>("../res/shaders/isometricTransferF.shader");
+        m_LightShader = std::make_unique<Shader>("../res/shaders/lightCube.shader");
         m_UnitCube = std::make_unique<UnitCube>();
-        //m_VolumeTexture = std::make_unique<VolumeTexture>("../res/textures/sample_data", glm::vec3(VOLUME_W, VOLUME_H, VOLUME_D));
+        m_LightCube = std::make_unique<UnitCube>();
         m_VolumeTexture = std::make_unique<VolumeTexture>("../res/textures/head256x256x109", glm::vec3(VOLUME_W, VOLUME_H, 108), true);
+        m_TransferFunc = std::make_unique<TransferFunction>();
 
         m_UnitCube->SetModelMatrix(glm::scale(m_UnitCube->GetModelMatrix(), glm::vec3(NORM_W, NORM_H, NORM_D)));
-        //m_UnitCube->SetModelMatrix(glm::rotate(m_UnitCube->GetModelMatrix(), 3.14f, glm::vec3(1,0,0)));
-        //m_Cube = std::make_unique<Model>("../res/models/box/box.obj");
+
     }
 
     VolumeRendering::~VolumeRendering()
@@ -62,7 +62,10 @@ namespace test_model
         glm::vec3 eye = m_Camera->GetPosition();
         glm::mat4 modelView = modelMatrix * view;
         glm::mat3 modelView3x3 = glm::mat3(modelView);
-        glm::mat3 normal = glm::transpose(glm::inverse(modelView3x3));
+        glm::mat3 normal = glm::inverse(modelView3x3);
+
+        // light testing
+        // m_LightCube->SetModelMatrix(glm::translate(glm::mat4(1.0f), lightPos));
 
         m_SimpleShader->Bind();
         m_SimpleShader->SetUniformMat4f("ViewMatrix", view);
@@ -73,20 +76,26 @@ namespace test_model
         m_SimpleShader->SetUniform3f("ray_origin", viewPos.x, viewPos.y, viewPos.z);
         m_SimpleShader->SetUniform3f("top", (float)NORM_W, (float)NORM_H, (float)NORM_D);
         m_SimpleShader->SetUniform3f("bottom", -(float)NORM_W, -(float)NORM_H, -(float)NORM_D);
-        // m_SimpleShader->SetUniform3f("top", 1, 1,1);
-        // m_SimpleShader->SetUniform3f("bottom", -1,-1,-1);
         m_SimpleShader->SetUniform3f("background_colour", m_ClearColor[0], m_ClearColor[1], m_ClearColor[2]);
         m_SimpleShader->SetUniform3f("material_colour", 1.0, 1.0, 1.0);
+        // why tf is this not working
+        // lightPos = viewPos;
+        // std::cout<<lightPos.x << " " << lightPos.y << " " << lightPos.z << std::endl
         m_SimpleShader->SetUniform3f("light_position", lightPos.x, lightPos.y, lightPos.z);
+
         m_SimpleShader->SetUniform1f("step_length", stepLen);
         m_SimpleShader->SetUniform1f("threshold", intensityThresh);
         m_SimpleShader->SetUniform1f("gamma", gamma);
-        // m_SimpleShader->SetUniform1i("volume", 0);
         
         m_Camera->Matrix(*m_SimpleShader, "u_CameraMatrix");
         m_VolumeTexture->Bind();
+        m_TransferFunc->Bind();
         m_UnitCube->Draw(*m_SimpleShader, *m_Camera);
-        // m_Cube->Draw(*m_SimpleShader, *m_Camera);
+
+        // light testing
+        //m_LightShader->Bind();
+        //m_Camera->Matrix(*m_LightShader, "u_CameraMatrix");
+        //m_LightCube->Draw(*m_LightShader, *m_Camera);
     }
 
 
@@ -99,7 +108,7 @@ namespace test_model
         if (ImGui::CollapsingHeader("Light")){
             ImGui::Indent();
 		    ImGui::SliderFloat("Intensity", &lightStrength, 0, 20);
-            ImGui::SliderFloat3("Light Position", &lightPos.x, 0, 800);
+            ImGui::SliderFloat3("Light Position", &lightPos.x, -3, 3);
             ImGui::Unindent();
         }
 

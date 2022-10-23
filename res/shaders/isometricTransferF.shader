@@ -1,5 +1,5 @@
 #shader vertex
-#version 330 core
+#version 420
 layout(location = 0) in vec3 a_Pos;
 
 uniform mat4 u_CameraMatrix;
@@ -11,7 +11,7 @@ void main()
 }
 
 #shader fragment
-#version 330 core
+#version 420
 
 out vec4 a_color;
 
@@ -32,7 +32,8 @@ uniform vec3 light_position;
 uniform float step_length;
 uniform float threshold;
 
-uniform sampler3D volume;
+layout(binding=0) uniform sampler3D volume;
+layout(binding=1) uniform sampler1D transferFunction;
 // uniform sampler2D jitter;
 
 uniform float gamma;
@@ -99,7 +100,11 @@ void main()
     ray_start += step_vector;// * texture(jitter, gl_FragCoord.xy / viewport_size).r;
 
     vec3 position = ray_start;
+    // vec3 colour = pow(background_colour, vec3(gamma));
     vec3 colour = pow(background_colour, vec3(gamma));
+
+    vec4 dst = vec4(0, 0, 0, 0);
+    vec4 src = vec4(0.0f);
 
     // Ray march until reaching the end of the volume
     while (ray_length > 0) {
@@ -114,28 +119,37 @@ void main()
             position -= step_vector * 0.5;
             posInv = position;
             posInv.y = 1 - posInv.y;
-
             intensity = texture(volume, posInv).r;
+
             position -= step_vector * (intensity > threshold ? 0.25 : -0.25);
             posInv = position;
             posInv.y = 1 - posInv.y;
             intensity = texture(volume, posInv).r;
 
+            // adding the transfer funtion
+            src = texture(transferFunction, intensity);
+            // oppacity correction
+            src.a = 1 - pow((1 - src.a), step_length / 0.5);
+
             // Blinn-Phong shading
-            vec3 L = normalize(light_position - position);
-            vec3 V = -normalize(ray);
-            vec3 N = normal(posInv, intensity);
-            vec3 H = normalize(L + V);
+            // vec3 L = normalize(light_position - position);
+            // vec3 V = -normalize(ray);
+            // vec3 N = normal(posInv, intensity);
+            // vec3 H = normalize(L + V);
 
-            float Ia = 0.1;
-            float Id = 1.0 * max(0, dot(N, L));
-            float Is = 8.0 * pow(max(0, dot(N, H)), 600);
-            colour = (Ia + Id) * material_colour + Is * vec3(1.0);
 
-            if (position.x < 0.0f || position.y < 0.0f || position.z < 0.0f)
-                colour = vec3(1,0,0); 
+            // float Ia = 0.1;
+            // float Id = 1.0 * max(0, dot(N, L));
+            // float Is = 8.0 * pow(max(0, dot(N, H)), 600);
+            // src.rgb = (Ia + Id) * src.rgb + Is * vec3(1.0);
 
-            break;
+            // front to back blending
+            src.rgb *= src.a;
+            dst = (1.0 - dst.a) * src + dst;
+
+            if(dst.a >= 0.95) 
+                break;
+            // break;
         }
 
         ray_length -= step_length;
@@ -143,7 +157,14 @@ void main()
     }
 
     // Gamma correction
-    //a_color.rgb = colour;
-    a_color.rgb = pow(colour, vec3(1.0 / gamma));
-    a_color.a = 1.0f;
+    //a_color = vec4(0.5f);
+    //a_color.rgb = pow(colour, vec3(1.0 / gamma));
+    //a_color.a = 1.0f;
+
+    //a_color.rgb = pow(src.rgb, vec3(1.0) / gamma);
+    //a_color.rgb = dst.rgb;
+    //a_color.a = 1.0f;
+    dst.rgb = pow(dst.rgb, vec3(1.0 / gamma));
+    a_color = dst;
+    //a_color.a = 1.0f;
 }
