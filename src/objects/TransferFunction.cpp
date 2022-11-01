@@ -3,22 +3,38 @@
 TransferFunction::TransferFunction()
 {
     colorPoints = std::vector{
-        glm::vec4(.91f, .7f, .61f, 0),
+        glm::vec4(1.0f, 1.0f, 1.0f, 0),
+        glm::vec4(.91f, .7f, .61f, 40),
         glm::vec4(.91f, .7f, .61f, 80),
         glm::vec4(1.0f, 1.0f, .85f, 82),
-        glm::vec4(1.0f, 1.0f, .85f, 256),
+        glm::vec4(1.0f, 1.0f, .85f, 255),
     };
 
+    /*
     alphaPoints = std::vector{
         glm::vec2(0.0f, 0),
         glm::vec2(0.0f, 40),
         glm::vec2(0.05f, 63),
         glm::vec2(0.0f, 80),
         glm::vec2(0.9f, 82),
-        glm::vec2(1.f, 256),
+        glm::vec2(1.f, 255),
+    };
+    */
+
+    alphaPoints = std::vector{
+        glm::vec2(0.0f, 0),
+        glm::vec2(0.0f, 80),
+        glm::vec2(0.9f, 82),
+        glm::vec2(1.f, 255),
     };
 
-    createTexture();
+    /*
+    alphaPoints = std::vector{
+        glm::vec2(0.90f, 0),
+        glm::vec2(1.f, 255),
+    };
+    */
+    
 }
 
 TransferFunction::TransferFunction(std::vector<glm::vec4> colorPoints, std::vector<glm::vec2> alphaPoints)
@@ -94,9 +110,6 @@ void TransferFunction::createTexture()
     for (int i = 0; i < transferFunc.size(); i++)
     {
         transferFunc[i] = getColor((float)i / (float)255);
-        std::cout << transferFunc[i][3] << std::endl;
-        //transferFunc[i] = glm::vec4(1,0,0,1);
-
     }
     
     // create 1D texture
@@ -176,4 +189,14 @@ void TransferFunction::Bind()
 void TransferFunction::Unbind()
 {
     glBindTexture(GL_TEXTURE_1D, 0);
+}
+
+void TransferFunction::setColorPointAtIdx(int id, glm::vec4 values)
+{
+    colorPoints[id] = values;
+}
+
+void TransferFunction::setAlphaPointAtIdx(int id, glm::vec2 values)
+{
+    alphaPoints[id] = values;
 }

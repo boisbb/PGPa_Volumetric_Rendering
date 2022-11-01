@@ -34,6 +34,11 @@ public:
     void createTexture();
     void Bind();
     void Unbind();
+    void setColorPointAtIdx(int id, glm::vec4 values);
+    void setAlphaPointAtIdx(int id, glm::vec2 values);
+    std::vector<glm::vec4> getColorPoints() const { return colorPoints; };
+    std::vector<glm::vec2> getAlphaPoints() const { return alphaPoints; };
+
     
 
 private:

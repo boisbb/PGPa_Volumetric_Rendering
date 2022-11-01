@@ -57,9 +57,11 @@ vec3 normal(vec3 position, float intensity)
 {
     float d = step_length;
     float dx = texture(volume, position + vec3(d,0,0)).r - intensity;
-    float dy = texture(volume, position + vec3(0,-d,0)).r - intensity;
+    // float dy = texture(volume, position + vec3(0,-d,0)).r - intensity;
+    float dy = texture(volume, position + vec3(0,d,0)).r - intensity;
     float dz = texture(volume, position + vec3(0,0,d)).r - intensity;
-    return -normalize(NormalMatrix * vec3(dx, dy, dz));
+    // return -normalize(NormalMatrix * vec3(dx, dy, dz));
+    return normalize(NormalMatrix * vec3(dx, dy, dz));
 }
 
 // Slab method for ray-box intersection
@@ -109,22 +111,25 @@ void main()
     // Ray march until reaching the end of the volume
     while (ray_length > 0) {
         // inverting the texture cuz of some OpenGL funny business
-        vec3 posInv = position;
-        posInv.y = 1 - posInv.y;
-        float intensity = texture(volume, posInv).r;
+        // vec3 posInv = position;
+        // posInv.y = 1 - posInv.y;
+        // float intensity = texture(volume, posInv).r;
+        float intensity = texture(volume, position).r;
 
         if (intensity > threshold) {
 
             // Get closer to the surface
             position -= step_vector * 0.5;
-            posInv = position;
-            posInv.y = 1 - posInv.y;
-            intensity = texture(volume, posInv).r;
+            // posInv = position;
+            // posInv.y = 1 - posInv.y;
+            // intensity = texture(volume, posInv).r;
+            intensity = texture(volume, position).r;
 
             position -= step_vector * (intensity > threshold ? 0.25 : -0.25);
-            posInv = position;
-            posInv.y = 1 - posInv.y;
-            intensity = texture(volume, posInv).r;
+            // posInv = position;
+            // posInv.y = 1 - posInv.y;
+            // intensity = texture(volume, posInv).r;
+            intensity = texture(volume, position).r;
 
             // adding the transfer funtion
             src = texture(transferFunction, intensity);
@@ -135,13 +140,19 @@ void main()
             // vec3 L = normalize(light_position - position);
             // vec3 V = -normalize(ray);
             // vec3 N = normal(posInv, intensity);
+            // vec3 N = normal(position, intensity);
             // vec3 H = normalize(L + V);
-
 
             // float Ia = 0.1;
             // float Id = 1.0 * max(0, dot(N, L));
             // float Is = 8.0 * pow(max(0, dot(N, H)), 600);
             // src.rgb = (Ia + Id) * src.rgb + Is * vec3(1.0);
+
+            vec3 light_direction = normalize(light_position - position);
+            vec3 nrml = normal(position, intensity);
+            vec3 lightDir = normalize(-light_direction);
+            float lambert = max(dot(nrml, lightDir), 0.0);
+            src.rgb = 1.0 * lambert * src.rgb + 0.1 * src.rgb;
 
             // front to back blending
             src.rgb *= src.a;
@@ -154,6 +165,9 @@ void main()
 
         ray_length -= step_length;
         position += step_vector;
+
+        // if (position.x > 1.0 || position.y > 1.0 || position.z > 1.0) 
+        //     break;
     }
 
     // Gamma correction
@@ -164,7 +178,8 @@ void main()
     //a_color.rgb = pow(src.rgb, vec3(1.0) / gamma);
     //a_color.rgb = dst.rgb;
     //a_color.a = 1.0f;
-    dst.rgb = pow(dst.rgb, vec3(1.0 / gamma));
+    vec3 mapped =  vec3(1.0) - exp(-dst.rgb * 2.0f);
+    dst.rgb = pow(mapped, vec3(1.0 / gamma));
     a_color = dst;
     //a_color.a = 1.0f;
 }
