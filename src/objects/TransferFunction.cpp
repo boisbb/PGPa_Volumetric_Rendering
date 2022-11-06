@@ -21,19 +21,20 @@ TransferFunction::TransferFunction()
     };
     */
 
+    /*
     alphaPoints = std::vector{
         glm::vec2(0.0f, 0),
         glm::vec2(0.0f, 80),
         glm::vec2(0.9f, 82),
         glm::vec2(1.f, 255),
     };
-
-    /*
+    */
+    
     alphaPoints = std::vector{
         glm::vec2(0.90f, 0),
+        glm::vec2(1.f, 120),
         glm::vec2(1.f, 255),
     };
-    */
     
 }
 

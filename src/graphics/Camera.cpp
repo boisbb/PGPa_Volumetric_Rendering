@@ -24,7 +24,8 @@
  * @param up Up vector
  */
 Camera::Camera(int width, int height, glm::vec3 position, glm::vec3 orientation, glm::vec3 up)
-    : c_Width(width), c_Height(height), c_Position(position), c_Orientation(orientation), c_Up(up)
+    : c_Width(width), c_Height(height), c_Position(position), c_Orientation(orientation), c_Up(up),
+    c_Rotation(0.0f, 0.0f)
 {
 }
 
@@ -104,22 +105,56 @@ void Camera::Input(GLFWwindow* window)
         double mouseY;
         glfwGetCursorPos(window, &mouseX, &mouseY);
 
+        glm::vec3 theRightAxis = glm::transpose(c_View)[0];
+        /*
+        double dx = mouseX - (c_Width / 2);
+        double dy = mouseY - (c_Height / 2);
+
+        float scale_x = abs(dx) / c_Width;
+        float scale_y = abs(dy) / c_Height;
+        float rotSpeed = 350.0f;
+
+        
+        float rot = rotSpeed * scale_y;
+
+        if (dy < 0)
+        {
+            if (c_Rotation.y + rot > 89.9999)
+            {
+                rot = 89.9999 - c_Rotation.y;
+            }
+            c_Position = glm::rotate(c_Position, glm::radians(rot), theRightAxis);
+            c_Rotation.y += rot;
+        }
+        else if (dy > 0)
+        {
+            if (c_Rotation.y - rot < -89.9999)
+            {
+                rot = 89.9999 + c_Rotation.y;
+            }
+            c_Position = glm::rotate(c_Position, glm::radians(-rot), theRightAxis);
+            c_Rotation.y -= rot;
+        }
+
+        if (dx < 0)
+        {
+            c_Position = glm::rotate(c_Position, glm::radians(-rotSpeed * scale_x), glm::vec3(0,1,0));
+            c_Rotation.x -= rotSpeed * scale_x;
+        }
+        else if (dx > 0) {
+            c_Position = glm::rotate(c_Position, glm::radians(rotSpeed * scale_x), glm::vec3(0,1,0));
+            c_Rotation.x += rotSpeed * scale_x;
+        }
+        */
+        
+
+        
         float rotx = sensitivity * (float)(mouseY - (c_Height / 2)) / c_Height;
         float roty = sensitivity * (float)(mouseX - (c_Width / 2)) / c_Width;
 
-        c_Position = glm::rotate(c_Position, glm::radians(-rotx), glm::vec3(1,0,0));
+        c_Position = glm::rotate(c_Position, glm::radians(-rotx), theRightAxis);
         c_Position = glm::rotate(c_Position, glm::radians(roty), glm::vec3(0,1,0));
-
-        /*
-        glm::vec3 newOrientation = glm::rotate(c_Orientation, glm::radians(-rotx), glm::normalize(glm::cross(c_Orientation, c_Up)));
-
-        if (!((glm::angle(newOrientation, c_Up) <= glm::radians(0.5f)) || (glm::angle(newOrientation, -c_Up) <= glm::radians(5.0f))))
-        {
-            c_Orientation = newOrientation;
-        }
-
-        c_Orientation = glm::rotate(c_Orientation, glm::radians(-roty), c_Up);
-        */
+        
 
         glfwSetCursorPos(window, (c_Width / 2), (c_Height / 2));
         

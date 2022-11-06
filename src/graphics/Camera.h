@@ -45,4 +45,6 @@ private:
 
     float c_Speed = 0.5f;
     float sensitivity = 100.0f;
+
+    glm::vec2 c_Rotation;
 };
