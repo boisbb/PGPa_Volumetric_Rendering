@@ -27,8 +27,8 @@ set ( SOURCE
   src/models/VolumeRendering.cpp
   src/models/VolumeRendering.h
   src/Application.cpp
-  src/graphics/Camera.cpp
-  src/graphics/Camera.h
+  src/graphics/ArcballCamera.cpp
+  src/graphics/ArcballCamera.h
   src/graphics/IndexBuffer.cpp
   src/graphics/IndexBuffer.h
   src/objects/UnitCube.cpp
@@ -39,8 +39,6 @@ set ( SOURCE
   src/graphics/Shader.h
   src/objects/VolumeTexture.cpp
   src/objects/VolumeTexture.h
-  src/objects/Texture.cpp
-  src/objects/Texture.h
   src/objects/TransferFunction.cpp
   src/objects/TransferFunction.h
   src/graphics/VertexArray.cpp

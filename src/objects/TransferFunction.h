@@ -28,7 +28,7 @@ private:
 class TransferFunction
 {
 public:
-    TransferFunction();
+    TransferFunction(std::string type = "human");
     TransferFunction(std::vector<glm::vec4> colorPoints, std::vector<glm::vec2> alphaPoints);
     glm::vec4 getColor(const float val);
     void createTexture();

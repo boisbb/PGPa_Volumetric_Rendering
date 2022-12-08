@@ -5,8 +5,7 @@
 #include "VertexArray.h"
 #include "VertexArray.h"
 #include "IndexBuffer.h"
-#include "Camera.h"
-#include "Texture.h"
+#include "ArcballCamera.h"
 #include "Renderer.h"
 
 #include "glm/gtx/string_cast.hpp"
@@ -18,7 +17,7 @@ public:
     UnitCube();
     ~UnitCube() {}
 
-    void Draw(Shader &shader, Camera &camera, glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f));
+    void Draw(Shader &shader, ArcballCamera &camera, glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f));
     void SetModelMatrix(glm::mat4 model_matrix);
 
     glm::mat4 GetModelMatrix() const { return model_matrix; }

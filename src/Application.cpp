@@ -15,8 +15,7 @@ http://docs.gl/
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
-#include "Texture.h"
-#include "Camera.h"
+#include "ArcballCamera.h"
 
 #include "vendor/glm/glm.hpp"
 #include "vendor/glm/gtc/matrix_transform.hpp"

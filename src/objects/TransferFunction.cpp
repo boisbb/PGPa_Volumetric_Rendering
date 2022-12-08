@@ -1,14 +1,58 @@
 #include "TransferFunction.h"
 
-TransferFunction::TransferFunction()
+TransferFunction::TransferFunction(std::string type)
 {
-    colorPoints = std::vector{
-        glm::vec4(1.0f, 1.0f, 1.0f, 0),
-        glm::vec4(.91f, .7f, .61f, 40),
-        glm::vec4(.91f, .7f, .61f, 80),
-        glm::vec4(1.0f, 1.0f, .85f, 82),
-        glm::vec4(1.0f, 1.0f, .85f, 255),
-    };
+    if (type == "human")
+    {
+        colorPoints = std::vector{
+            glm::vec4(1.0f, 1.0f, 1.0f, 0),
+            glm::vec4(.91f, .7f, .61f, 40),
+            glm::vec4(.91f, .7f, .61f, 85),
+            glm::vec4(1.0f, 1.0f, .85f, 95),
+            glm::vec4(1.0f, 1.0f, .85f, 255),
+        };
+
+        alphaPoints = std::vector{
+            glm::vec2(0.9f, 0),
+            glm::vec2(1.f, 134),
+            glm::vec2(1.f, 255),
+        };
+    }
+    else if (type == "teapot")
+    {
+        colorPoints = std::vector {
+            glm::vec4(1.0f, 1.0f, 1.0f, 41.153),
+            glm::vec4(0.f, 255.f/255.f, 7.f/255.f, 208),
+            glm::vec4(245.f/255.f, 0.f, 253.f/255.f, 85),
+            glm::vec4(217.f/255.f, 222.f/255.f, 255.f/255.f, 134),
+            glm::vec4(255.f/255.f, 217.f/255.f, 239.f/255.f, 255),
+        };
+
+        alphaPoints = std::vector{
+            glm::vec2(0.978f, 0),
+            glm::vec2(0.995f, 17.647),
+            glm::vec2(0.965f, 255),
+        };
+    }
+    else
+    {
+        colorPoints = std::vector {
+            glm::vec4(1.0f, 1.0f, 1.0f, 19.615),
+            glm::vec4(156.f/255.f, 232.f/255.f, 158.f/255.f, 160),
+            glm::vec4(156.f/255.f, 232.f/255.f, 156.f/255.f, 85),
+            glm::vec4(217.f/255.f, 222.f/255.f, 255.f/255.f, 95),
+            glm::vec4(255.f/255.f, 217.f/255.f, 239.f/255.f, 255),
+        };
+
+        alphaPoints = std::vector{
+            glm::vec2(0.978f, 0),
+            glm::vec2(0.995f, 160),
+            glm::vec2(0.974f, 255),
+        };
+    }
+    
+
+    
 
     /*
     alphaPoints = std::vector{
@@ -29,12 +73,8 @@ TransferFunction::TransferFunction()
         glm::vec2(1.f, 255),
     };
     */
+
     
-    alphaPoints = std::vector{
-        glm::vec2(0.90f, 0),
-        glm::vec2(1.f, 120),
-        glm::vec2(1.f, 255),
-    };
     
 }
 

@@ -44,14 +44,14 @@ void VolumeTexture::LoadFromBin(const std::string path)
     glBindTexture(GL_TEXTURE_3D, m_TextureID);
 
     // set the texture parameters
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);  // The array on the host has 1 byte alignment
     glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, volumeDim.x, volumeDim.y, volumeDim.z, 0, GL_RED, GL_UNSIGNED_BYTE, &buffer[0]);
-    glGenerateMipmap(GL_TEXTURE_3D);
+    // glGenerateMipmap(GL_TEXTURE_3D);
     glBindTexture(GL_TEXTURE_3D, 0);
 
     /*

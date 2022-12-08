@@ -47,7 +47,7 @@ UnitCube::UnitCube()
     m_VAO->AddBuffer(*m_VertexBuffer, layout);
 }
 
-void UnitCube::Draw(Shader &shader, Camera &camera, glm::vec3 scale, glm::vec3 translate)
+void UnitCube::Draw(Shader &shader, ArcballCamera &camera, glm::vec3 scale, glm::vec3 translate)
 {
     shader.Bind();
     m_VAO->Bind();

@@ -31,6 +31,7 @@ uniform vec3 light_position;
 
 uniform float step_length;
 uniform float threshold;
+uniform float dither_ratio;
 
 layout(binding=0) uniform sampler3D volume;
 layout(binding=1) uniform sampler1D transferFunction;
@@ -98,8 +99,11 @@ void main()
     float ray_length = length(ray);
     vec3 step_vector = step_length * ray / ray_length;
 
-    // Random jitter
-    ray_start += step_vector;// * texture(jitter, gl_FragCoord.xy / viewport_size).r;
+    // Dithering
+    float starting_offset = t_0;
+    starting_offset += step_length * fract(sin(dot(gl_FragCoord.xy, vec2(12.9898,78.233))+dither_ratio) * 43758.5453);
+
+    ray_start += step_vector * starting_offset;// * texture(jitter, gl_FragCoord.xy / viewport_size).r;
 
     vec3 position = ray_start;
     // vec3 colour = pow(background_colour, vec3(gamma));
