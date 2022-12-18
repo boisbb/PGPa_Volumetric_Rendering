@@ -1,7 +1,10 @@
 #include "VolumeTexture.h"
 
 VolumeTexture::VolumeTexture(const std::string& path, glm::vec3 dimensions, bool binFile)
-    : volumeDim(dimensions)
+    : volumeDim(dimensions), 
+    zImages((int)dimensions.z, std::vector((int)(dimensions.x * dimensions.y), (unsigned char)0)),
+    yImages((int)dimensions.y, std::vector((int)(dimensions.z * dimensions.x), (unsigned char)0)),
+    xImages((int)dimensions.x, std::vector((int)(dimensions.z * dimensions.y), (unsigned char)0))
 {
     if (binFile)
     {
@@ -11,6 +14,10 @@ VolumeTexture::VolumeTexture(const std::string& path, glm::vec3 dimensions, bool
     {
         LoadFromPNGs(path);
     }
+
+    surfacePlaneZ = std::make_unique<SurfacePlane>(zImages[150], glm::vec2(dimensions.x, dimensions.y), 0);
+    surfacePlaneY = std::make_unique<SurfacePlane>(yImages[150], glm::vec2(dimensions.x, dimensions.z), 0);
+    surfacePlaneX = std::make_unique<SurfacePlane>(xImages[150], glm::vec2(dimensions.y, dimensions.z), 0);
 }
 
 /**
@@ -33,6 +40,25 @@ void VolumeTexture::Unbind() const
     glBindTexture(GL_TEXTURE_3D, 0);
 }
 
+void VolumeTexture::UpdateSPSlice(SliceAxis sliceAxis, int sliceId)
+{
+    switch(sliceAxis)
+    {
+        case Z:
+            std::cout << "update slice" << std::endl;
+            surfacePlaneZ->UpdateSlice(zImages[sliceId]);
+            break;
+        case Y:
+            std::cout << "update slice" << std::endl;
+            surfacePlaneY->UpdateSlice(yImages[sliceId]);
+            break;
+        case X:
+            std::cout << "update slice" << std::endl;
+            surfacePlaneX->UpdateSlice(xImages[sliceId]);
+            break;
+    }
+}
+
 void VolumeTexture::LoadFromBin(const std::string path)
 {
     stbi_set_flip_vertically_on_load(1);
@@ -53,6 +79,8 @@ void VolumeTexture::LoadFromBin(const std::string path)
     glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, volumeDim.x, volumeDim.y, volumeDim.z, 0, GL_RED, GL_UNSIGNED_BYTE, &buffer[0]);
     // glGenerateMipmap(GL_TEXTURE_3D);
     glBindTexture(GL_TEXTURE_3D, 0);
+
+    ConstructImageVector(buffer);
 
     /*
     std::vector<unsigned char> firstBuff;
@@ -115,5 +143,48 @@ void VolumeTexture::LoadFilenames(const std::string path)
     for (const auto& entry : fs::directory_iterator(path))
     {
         imageFiles.insert(entry.path());
+    }
+}
+
+void VolumeTexture::ConstructImageVector(const std::vector<unsigned char> volumeBuffer)
+{
+
+    // Construct going along Z axis
+    #pragma omp parallel for
+    for (int z = 0; z < (int)volumeDim.z; z++)
+    {
+        for (int y = 0; y < (int)volumeDim.y; y++)
+        {
+            for (int x = 0; x < (int)volumeDim.x; x++)
+            {
+                int xyIdx = y * volumeDim.x + x;
+                int xzIdx = z * volumeDim.x + x;
+                int yzIdx = z * volumeDim.y + y;
+                int zIdx = z * volumeDim.y * volumeDim.x + xyIdx;
+                zImages[z][xyIdx] = volumeBuffer[zIdx];
+                yImages[y][xzIdx] = volumeBuffer[zIdx];
+                xImages[x][yzIdx] = volumeBuffer[zIdx];
+            }
+        }
+    }
+
+    int dimsMax = std::max(std::max(volumeDim.z, volumeDim.y), volumeDim.x);
+
+    for (int i = 0; i < dimsMax; i++)
+    {
+        if (i < (int)volumeDim.z)
+        {
+            std::reverse(zImages[i].begin(), zImages[i].end());
+        }
+
+        if (i < (int)volumeDim.y)
+        {
+            std::reverse(yImages[i].begin(), yImages[i].end());
+        }
+
+        if (i < (int)volumeDim.x)
+        {
+            std::reverse(xImages[i].begin(), xImages[i].end());
+        }
     }
 }

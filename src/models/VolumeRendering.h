@@ -44,21 +44,27 @@ namespace test_model {
         std::unique_ptr<TransferFunction> m_TransferFunc;
         
         // light testing
-        std::unique_ptr<UnitCube> m_LightCube;
-        std::unique_ptr<Shader> m_LightShader;
+        std::unique_ptr<Shader> m_SurfacePlaneShader;
 
         glm::vec3 lightPos = glm::vec3(1.5f,0.0f,1.5f);
         glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
         float lightStrength = 0.5f;
 
+        glm::ivec2 windowSize;
+        glm::ivec2 splitScreenWindowSize;
+        glm::ivec2 currentWindowSize;
         float intensityThresh = 0.3;
         float stepLen = 0.001;
         float gamma = 0.4;
         float dither_ratio = 1.f;
+        int sliceZIdx;
+        int sliceYIdx;
+        int sliceXIdx;
 
-        int WIDTH;
-        int HEIGHT;
+        float pixelOffset = 0;
+
         bool takeScreenshot = false;
+        bool splitScreen = false;
 
         GLuint vbo;
     };

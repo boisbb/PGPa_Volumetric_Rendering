@@ -15,7 +15,7 @@
 #define SKULL 6
 #define TOOTH 7
 
-#define MODEL TOOTH
+#define MODEL HEAD
 
 #if MODEL == HEAD_ORIG
 #define VOLUME_D 109
@@ -65,8 +65,12 @@
 namespace test_model
 {
     VolumeRendering::VolumeRendering(GLFWwindow* window, int width, int height)
-        : m_ClearColor {0.0f, 0.0f, 0.0f, 1.0f}, WIDTH(width), HEIGHT(height), m_Window(window)             
+        : m_ClearColor {0.0f, 0.0f, 0.0f, 1.0f}, windowSize(width, height), m_Window(window),
+        currentWindowSize(width, height), sliceZIdx((int)(VOLUME_D) / 2), sliceYIdx((int)(VOLUME_H) / 2),
+        sliceXIdx((int)(VOLUME_W) / 2)
     {
+        std::cout << height << std::endl;
+        std::cout << windowSize.y << std::endl;
         fs::create_directory("../screenshots");
 
         glDisable(GL_DEPTH_TEST);
@@ -74,11 +78,10 @@ namespace test_model
         glEnable(GL_CULL_FACE);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        m_ArcCamera = std::make_unique<ArcballCamera>(WIDTH, HEIGHT, glm::vec3(0, 0, -3));
+        m_ArcCamera = std::make_unique<ArcballCamera>(currentWindowSize.x, currentWindowSize.y, glm::vec3(0, 0, -3));
         m_SimpleShader = std::make_unique<Shader>("../res/shaders/isometricTransferF.shader");
-        m_LightShader = std::make_unique<Shader>("../res/shaders/lightCube.shader");
+        m_SurfacePlaneShader = std::make_unique<Shader>("../res/shaders/surfacePlane.shader");
         m_UnitCube = std::make_unique<UnitCube>();
-        m_LightCube = std::make_unique<UnitCube>();
         m_VolumeTexture = std::make_unique<VolumeTexture>("../res/textures/" + (std::string)MODEL_NAME, glm::vec3(VOLUME_W, VOLUME_H, VOLUME_D), true);
         m_TransferFunc = std::make_unique<TransferFunction>(TRANSFER_FUNC_TYPE);
         m_TransferFunc->createTexture();
@@ -99,6 +102,7 @@ namespace test_model
 
     void VolumeRendering::OnRender()
     {
+        glViewport(0, pixelOffset, currentWindowSize.x, currentWindowSize.y);
         glClearColor(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], m_ClearColor[3]);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         float FOV = 45.0f;
@@ -122,19 +126,23 @@ namespace test_model
         // light testing
         //m_LightCube->SetModelMatrix(glm::scale(glm::translate(glm::mat4(1.0f), lightPos), glm::vec3(0.5)));
 
+        //m_SurfacePlaneShader->Bind();
+        //m_ArcCamera->Matrix(*m_SurfacePlaneShader, "u_CameraMatrix");
+        //m_VolumeTexture->surfacePlaneZ->Draw(*m_SurfacePlaneShader);
+
         m_SimpleShader->Bind();
         m_SimpleShader->SetUniformMat4f("ViewMatrix", view);
         m_SimpleShader->SetUniformMat3f("NormalMatrix", normal);
         m_SimpleShader->SetUniform1f("focal_length", m_ArcCamera->GetFocalLength());
-        m_SimpleShader->SetUniform1f("aspect_ratio", WIDTH / HEIGHT);
+        m_SimpleShader->SetUniform1f("aspect_ratio", currentWindowSize.x / currentWindowSize.y);
         m_SimpleShader->SetUniform1f("dither_ratio", dither_ratio);
-        m_SimpleShader->SetUniform2f("viewport_size", WIDTH, HEIGHT);
+        m_SimpleShader->SetUniform1f("pixel_offset", pixelOffset);
+        m_SimpleShader->SetUniform2f("viewport_size", currentWindowSize.x, currentWindowSize.y);
         m_SimpleShader->SetUniform3f("ray_origin", viewPos.x, viewPos.y, viewPos.z);
         m_SimpleShader->SetUniform3f("top", (float)NORM_W, (float)NORM_H, (float)NORM_D);
         m_SimpleShader->SetUniform3f("bottom", -(float)NORM_W, -(float)NORM_H, -(float)NORM_D);
-        m_SimpleShader->SetUniform3f("background_colour", m_ClearColor[0], m_ClearColor[1], m_ClearColor[2]);
+        m_SimpleShader->SetUniform3f("background_colour", 1.0, m_ClearColor[1], m_ClearColor[2]);
         m_SimpleShader->SetUniform3f("material_colour", 1.0, 1.0, 1.0);
-        // why tf is this not working
         lightPos = viewPos;
         // std::cout<<lightPos.x << " " << lightPos.y << " " << lightPos.z << std::endl
         m_SimpleShader->SetUniform3f("light_position", lightPos.x, lightPos.y, lightPos.z);
@@ -146,12 +154,23 @@ namespace test_model
         m_ArcCamera->Matrix(*m_SimpleShader, "u_CameraMatrix");
         m_VolumeTexture->Bind();
         m_TransferFunc->Bind();
-        m_UnitCube->Draw(*m_SimpleShader, *m_ArcCamera);
+        m_UnitCube->Draw(*m_SimpleShader);
 
-        // light testing
-        m_LightShader->Bind();
-        m_ArcCamera->Matrix(*m_LightShader, "u_CameraMatrix");
-        //m_LightCube->Draw(*m_LightShader, *m_ArcCamera);
+        // Surface Planes rendering
+        if (splitScreen)
+        {
+            m_SurfacePlaneShader->Bind();
+            m_SimpleShader->SetUniformMat4f("u_CameraMatrix", glm::mat4(1.f));
+
+            glViewport(0, 0, currentWindowSize.x, currentWindowSize.y);
+            m_VolumeTexture->surfacePlaneZ->Draw(*m_SurfacePlaneShader);
+
+            glViewport(currentWindowSize.x, 0, currentWindowSize.x, currentWindowSize.y);
+            m_VolumeTexture->surfacePlaneY->Draw(*m_SurfacePlaneShader);
+
+            glViewport(currentWindowSize.x, currentWindowSize.x, currentWindowSize.x, currentWindowSize.y);
+            m_VolumeTexture->surfacePlaneX->Draw(*m_SurfacePlaneShader);
+        }
 
         if (takeScreenshot)
         {
@@ -166,6 +185,39 @@ namespace test_model
         ImGui::Begin("Test");
         ImGui::ColorEdit4("Clear Color", m_ClearColor);
         ImGui::End();
+
+        if (ImGui::Checkbox("Show Slices", &splitScreen))
+        {
+            currentWindowSize = (currentWindowSize.x == windowSize.x) ? windowSize / 2 : windowSize;
+
+            pixelOffset = currentWindowSize.x % windowSize.x;
+            m_ArcCamera->SetDimensions(currentWindowSize);
+        }
+
+        if (splitScreen)
+        {
+            if (ImGui::CollapsingHeader("Slices"))
+            {
+                ImGui::Indent();
+                if (ImGui::SliderInt("Slice Z", &sliceZIdx, 0, (int)VOLUME_D - 1))
+                {
+                    m_VolumeTexture->UpdateSPSlice(Z, sliceZIdx);
+                }
+
+                if (ImGui::SliderInt("Slice Y", &sliceYIdx, 0, (int)VOLUME_H - 1))
+                {
+                    m_VolumeTexture->UpdateSPSlice(Y, sliceYIdx);
+                }
+
+                if (ImGui::SliderInt("Slice X", &sliceXIdx, 0, (int)VOLUME_W - 1))
+                {
+                    m_VolumeTexture->UpdateSPSlice(X, sliceXIdx);
+                }
+		        //ImGui::SliderFloat("Intensity", &lightStrength, 0, 20);
+                //ImGui::SliderFloat3("Light Position", &lightPos.x, -3, 3);
+                ImGui::Unindent();
+            }
+        }
 
         if (ImGui::Button("Take screenshot"))
         {
@@ -245,13 +297,13 @@ namespace test_model
         nowSS << std::put_time(localtime(&now), "%F-%H-%M-%S");
 
         std::string fn = "../screenshots/" + nowSS.str() + ".tga";
-        int* buffer = new int[WIDTH * HEIGHT * 3];
-        glReadPixels( 0, 0, WIDTH, HEIGHT, GL_BGR, GL_UNSIGNED_BYTE, buffer );
+        int* buffer = new int[windowSize.x * windowSize.y * 3];
+        glReadPixels( 0, 0, windowSize.x, windowSize.y, GL_BGR, GL_UNSIGNED_BYTE, buffer );
 
         FILE   *out = fopen(fn.c_str(), "w");
-        short TGAhead[] = {0, 2, 0, 0, 0, 0, WIDTH, HEIGHT, 24};
+        short TGAhead[] = {0, 2, 0, 0, 0, 0, windowSize.x, windowSize.y, 24};
         fwrite(&TGAhead, sizeof(TGAhead), 1, out);
-        fwrite(buffer, 3 * WIDTH * HEIGHT, 1, out);
+        fwrite(buffer, 3 * windowSize.x * windowSize.y, 1, out);
         fclose(out);
         delete buffer;
     }

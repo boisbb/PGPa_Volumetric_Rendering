@@ -32,6 +32,7 @@ uniform vec3 light_position;
 uniform float step_length;
 uniform float threshold;
 uniform float dither_ratio;
+uniform float pixel_offset;
 
 layout(binding=0) uniform sampler3D volume;
 layout(binding=1) uniform sampler1D transferFunction;
@@ -82,7 +83,8 @@ void ray_box_intersection(Ray ray, AABB box, out float t_0, out float t_1)
 void main()
 {
     vec3 ray_direction;
-    ray_direction.xy = 2.0 * gl_FragCoord.xy / viewport_size - 1.0;
+    vec2 offsetFragCoord = vec2(gl_FragCoord.x, gl_FragCoord.y - pixel_offset);
+    ray_direction.xy = 2.0 * offsetFragCoord / viewport_size - 1.0;
     ray_direction.x *= aspect_ratio;
     ray_direction.z = -focal_length;
     ray_direction = (vec4(ray_direction, 0) * ViewMatrix).xyz;
@@ -186,4 +188,6 @@ void main()
     dst.rgb = pow(mapped, vec3(1.0 / gamma));
     a_color = dst;
     //a_color.a = 1.0f;
+    //a_color = vec4(1,1,1,1);
+
 }

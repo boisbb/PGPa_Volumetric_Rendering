@@ -37,6 +37,10 @@ set ( SOURCE
   src/graphics/Renderer.h
   src/graphics/Shader.cpp
   src/graphics/Shader.h
+  src/objects/Texture.cpp
+  src/objects/Texture.h
+  src/objects/SurfacePlane.cpp
+  src/objects/SurfacePlane.h
   src/objects/VolumeTexture.cpp
   src/objects/VolumeTexture.h
   src/objects/TransferFunction.cpp
@@ -71,6 +75,10 @@ target_link_libraries(VolumeRendering GLEW::GLEW)
 # ASSIMP linking
 find_package(assimp REQUIRED)
 target_link_libraries(VolumeRendering assimp)
+
+# OpenMP linking
+find_package(OpenMP REQUIRED)
+target_link_libraries(VolumeRendering OpenMP::OpenMP_CXX)
 
 include_directories(src/vendor/imgui/libs/imgui/)
 include_directories(src/graphics/)

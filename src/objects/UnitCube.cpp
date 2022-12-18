@@ -37,17 +37,17 @@ std::vector<unsigned int> indices =
 UnitCube::UnitCube()
     : m_Indices(indices), m_Vertices(vertices)
 {
-    m_VAO = new VertexArray();
+    m_VAO = std::make_unique<VertexArray>();
     m_VAO->Bind();
-    m_IndexBuffer = new IndexBuffer(m_Indices);
-    m_VertexBuffer = new VertexBuffer(m_Vertices);
+    m_IndexBuffer = std::make_unique<IndexBuffer>(m_Indices);
+    m_VertexBuffer = std::make_unique<VertexBuffer>(m_Vertices);
 
     VertexBufferLayout layout;
     layout.Push<float>(3);
     m_VAO->AddBuffer(*m_VertexBuffer, layout);
 }
 
-void UnitCube::Draw(Shader &shader, ArcballCamera &camera, glm::vec3 scale, glm::vec3 translate)
+void UnitCube::Draw(Shader &shader, glm::vec3 scale, glm::vec3 translate)
 {
     shader.Bind();
     m_VAO->Bind();

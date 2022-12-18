@@ -33,10 +33,13 @@ public:
     void Input(GLFWwindow* window);
     void Matrix(Shader& shader, const char* uniform);
 
+
     glm::mat4 GetProjection() const { return c_Projection; }
     glm::mat4 GetView() const { return c_View; }
     glm::mat4 GetMatrix() const { return c_Matrix; }
     float GetFocalLength() const { return c_FocalLength; }
+
+    void SetDimensions(glm::ivec2 dims) { c_Width = dims.x; c_Height = dims.y; }
 private:
     float GetZCoord(float x, float y);
     void QuaternionRotate(glm::vec3 startPos, glm::vec3 currentPos);

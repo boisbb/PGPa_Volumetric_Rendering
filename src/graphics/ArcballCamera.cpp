@@ -38,8 +38,12 @@ void ArcballCamera::Input(GLFWwindow* window)
     if (watchCursorPos)
     {
         glfwGetCursorPos(window, &currPosX, &currPosY);
-        if ((currPosX != prevMousePosX || currPosY != prevMousePosY))
+        if (currPosX <= c_Width && currPosY <= c_Height)
         {
+            if ((currPosX != prevMousePosX || currPosY != prevMousePosY))
+            {
+            std::cout << "Previous: " << prevMousePosX << " " << prevMousePosY << std::endl;
+            std::cout << "Current: " << currPosX << " " << currPosY << std::endl;
 
             glm::vec3 startPos;
             // convert to NDC
@@ -54,6 +58,7 @@ void ArcballCamera::Input(GLFWwindow* window)
 
             QuaternionRotate(startPos, currentPos);
 
+            }
         }
     }
 
@@ -85,11 +90,16 @@ void ArcballCamera::Input(GLFWwindow* window)
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS){
         if (!watchCursorPos)
         {
+            double newPrevMousePosX, newPrevMousePosY;
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-            glfwGetCursorPos(window, &prevMousePosX, &prevMousePosY);
-            std::cout << "Previous: " << prevMousePosX << " " << prevMousePosY << std::endl;
+            glfwGetCursorPos(window, &newPrevMousePosX, &newPrevMousePosY);
+            if (newPrevMousePosX <= c_Width && newPrevMousePosY <= c_Height)
+            {
+                prevMousePosX = newPrevMousePosX;
+                prevMousePosY = newPrevMousePosY;
+                watchCursorPos = true;
+            }
 
-            watchCursorPos = true;
         }
         //if (firstClick)
         //{
