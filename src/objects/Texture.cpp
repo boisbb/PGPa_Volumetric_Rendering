@@ -1,3 +1,8 @@
+/*
+* Volumetric Renderer implementation as a project for PGPa, 2MIT, VUT FIT
+* Author: Boris Burkalo (xburka00), 2MIT
+*/
+
 #include "Texture.h"
 
 
@@ -41,13 +46,23 @@ Texture::Texture(const std::string& path, unsigned int slot, int rows, bool flip
 }
 
 Texture::Texture(std::vector<unsigned char> data, glm::ivec2 dims, unsigned int unit)
-    : m_FilePath(""), unit(unit), m_Width(dims.x), m_Height(dims.y), imageData(data)
+    : m_FilePath(""), unit(unit), m_Width(dims.x), m_Height(dims.y)
+{
+    Init(data);
+}
+
+Texture::~Texture() 
+{
+    
+}
+
+void Texture::Init(std::vector<unsigned char> data)
 {
     glGenTextures(1, &m_RendererID);
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(GL_TEXTURE_2D, m_RendererID);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_Width, m_Height, 0, GL_RED, GL_UNSIGNED_BYTE, &imageData[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_Width, m_Height, 0, GL_RED, GL_UNSIGNED_BYTE, &data[0]);
 
 	glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -56,25 +71,11 @@ Texture::Texture(std::vector<unsigned char> data, glm::ivec2 dims, unsigned int 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    std::vector<unsigned char> firstBuff;
-    for (int i = 0; i < m_Width*m_Height; i++)
-    {
-        firstBuff.push_back(imageData.at(i));
-    }
-    stbi_write_jpg("test.jpg", m_Width, m_Height, 1, &firstBuff[0], 100);
-
     Unbind();
 }
 
-Texture::~Texture() 
-{
-    
-}
-
-
 void Texture::Update(std::vector<unsigned char> data)
 {
-    std::cout << "updated slice" << std::endl;
     glBindTexture(GL_TEXTURE_2D, m_RendererID);
 
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, GL_RED, GL_UNSIGNED_BYTE, data.data());
@@ -89,6 +90,14 @@ void Texture::Update(std::vector<unsigned char> data)
     Unbind();
 }
 
+void Texture::ReInit(std::vector<unsigned char> data, glm::vec2 dims)
+{
+    m_Width = dims.x;
+    m_Height = dims.y;
+
+    glDeleteTextures(1, &m_RendererID);
+    Init(data);
+}
 
 /**
  * @brief Set the unit of a texture for shader.

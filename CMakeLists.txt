@@ -72,10 +72,6 @@ target_link_libraries(VolumeRendering IMGUI)
 find_package(GLEW 2.0 REQUIRED)
 target_link_libraries(VolumeRendering GLEW::GLEW)
 
-# ASSIMP linking
-find_package(assimp REQUIRED)
-target_link_libraries(VolumeRendering assimp)
-
 # OpenMP linking
 find_package(OpenMP REQUIRED)
 target_link_libraries(VolumeRendering OpenMP::OpenMP_CXX)

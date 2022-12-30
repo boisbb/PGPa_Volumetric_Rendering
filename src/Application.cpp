@@ -73,10 +73,10 @@ int main(int argc, char* argv[])
 
     test_model::TestModel* currentTestModel = NULL;
     test_model::TestModelMenu* testModelMenu = new test_model::TestModelMenu(currentTestModel);
-    currentTestModel = testModelMenu;
 
     // testModelMenu->RegisterTestModel<test_model::CarModels>("CarModels", window, WIDTH, HEIGHT);
     testModelMenu->RegisterTestModel<test_model::VolumeRendering>("VolumeRendering", window, WIDTH, HEIGHT);
+    currentTestModel = testModelMenu->SetTestModel("VolumeRendering");
 
     if (argc == 2)
     {
@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
             WIDTH = w;
             HEIGHT = h;
             glViewport(0,0, w, h);
-            currentTestModel->ModelReinit(w, h);
+            currentTestModel->OnWindowResize(glm::vec2(WIDTH, HEIGHT));
         }
         
 
@@ -108,10 +108,10 @@ int main(int argc, char* argv[])
             currentTestModel->OnUpdate(0.0f);
             currentTestModel->OnRender();
 
-            if (currentTestModel != testModelMenu && (glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS || ImGui::Button("<-"))){
-                delete currentTestModel;
-                currentTestModel = testModelMenu;
-            }
+            // if (currentTestModel != testModelMenu && (glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS || ImGui::Button("<-"))){
+            //     delete currentTestModel;
+            //     currentTestModel = testModelMenu;
+            // }
             currentTestModel->OnImGuiRender();
         }
         ImGui::End();

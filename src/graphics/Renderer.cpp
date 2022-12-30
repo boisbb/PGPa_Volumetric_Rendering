@@ -1,3 +1,8 @@
+/*
+* Volumetric Renderer implementation as a project for PGPa, 2MIT, VUT FIT
+* Author: Boris Burkalo (xburka00), 2MIT
+*/
+
 #include "Renderer.h"
 #include <iostream>
 

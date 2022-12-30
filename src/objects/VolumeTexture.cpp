@@ -1,3 +1,8 @@
+/*
+* Volumetric Renderer implementation as a project for PGPa, 2MIT, VUT FIT
+* Author: Boris Burkalo (xburka00), 2MIT
+*/
+
 #include "VolumeTexture.h"
 
 VolumeTexture::VolumeTexture(const std::string& path, glm::vec3 dimensions, bool binFile)
@@ -15,9 +20,9 @@ VolumeTexture::VolumeTexture(const std::string& path, glm::vec3 dimensions, bool
         LoadFromPNGs(path);
     }
 
-    surfacePlaneZ = std::make_unique<SurfacePlane>(zImages[150], glm::vec2(dimensions.x, dimensions.y), 0);
-    surfacePlaneY = std::make_unique<SurfacePlane>(yImages[150], glm::vec2(dimensions.x, dimensions.z), 0);
-    surfacePlaneX = std::make_unique<SurfacePlane>(xImages[150], glm::vec2(dimensions.y, dimensions.z), 0);
+    surfacePlaneZ = std::make_unique<SurfacePlane>(zImages[(int)(volumeDim.z / 2)], glm::vec2(volumeDim.x, volumeDim.y), 0);
+    surfacePlaneY = std::make_unique<SurfacePlane>(yImages[(int)(volumeDim.y / 2)], glm::vec2(volumeDim.x, volumeDim.z), 0);
+    surfacePlaneX = std::make_unique<SurfacePlane>(xImages[(int)(volumeDim.x / 2)], glm::vec2(volumeDim.y, volumeDim.z), 0);
 }
 
 /**
@@ -45,18 +50,31 @@ void VolumeTexture::UpdateSPSlice(SliceAxis sliceAxis, int sliceId)
     switch(sliceAxis)
     {
         case Z:
-            std::cout << "update slice" << std::endl;
             surfacePlaneZ->UpdateSlice(zImages[sliceId]);
             break;
         case Y:
-            std::cout << "update slice" << std::endl;
             surfacePlaneY->UpdateSlice(yImages[sliceId]);
             break;
         case X:
-            std::cout << "update slice" << std::endl;
             surfacePlaneX->UpdateSlice(xImages[sliceId]);
             break;
     }
+}
+
+void VolumeTexture::UpdateFromBin(const std::string &path, const glm::vec3 &dimensions)
+{
+    volumeDim = dimensions;
+    zImages = std::vector((int)dimensions.z, std::vector((int)(dimensions.x * dimensions.y), (unsigned char)0));
+    yImages = std::vector((int)dimensions.y, std::vector((int)(dimensions.z * dimensions.x), (unsigned char)0));
+    xImages = std::vector((int)dimensions.x, std::vector((int)(dimensions.z * dimensions.y), (unsigned char)0));
+    
+    glDeleteTextures(1, &m_TextureID);
+
+    LoadFromBin(path);
+
+    surfacePlaneX->ReInitSlice(xImages[(int)(volumeDim.x / 2)], glm::vec2(volumeDim.y, volumeDim.z));
+    surfacePlaneY->ReInitSlice(yImages[(int)(volumeDim.y / 2)], glm::vec2(volumeDim.x, volumeDim.z));
+    surfacePlaneZ->ReInitSlice(zImages[(int)(volumeDim.z / 2)], glm::vec2(volumeDim.x, volumeDim.y));
 }
 
 void VolumeTexture::LoadFromBin(const std::string path)
@@ -113,10 +131,8 @@ void VolumeTexture::LoadFromPNGs(const std::string path)
     glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, volumeDim.x, volumeDim.y, volumeDim.z, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
     int depth = 0;
 
-    // TODO: for now loading from files, extend to raw files
     for (auto& filename : imageFiles)
     {
-        // std::cout << filename.c_str() << std::endl;
         int w, h, bpp;
         m_LocalBuffer = stbi_load(filename.c_str(), &w, &h, &bpp, 1);
 
@@ -139,7 +155,6 @@ void VolumeTexture::LoadFromPNGs(const std::string path)
 
 void VolumeTexture::LoadFilenames(const std::string path)
 {
-    std::cout << path << std::endl;
     for (const auto& entry : fs::directory_iterator(path))
     {
         imageFiles.insert(entry.path());

@@ -1,3 +1,8 @@
+/*
+* Volumetric Renderer implementation as a project for PGPa, 2MIT, VUT FIT
+* Author: Boris Burkalo (xburka00), 2MIT
+*/
+
 #include "TestModel.h"
 #include "imgui.h"
 
@@ -25,5 +30,10 @@ namespace test_model
         }
 
         return NULL;
+    }
+
+    void TestModelMenu::OnWindowResize(glm::vec2 size)
+    {
+
     }
 }

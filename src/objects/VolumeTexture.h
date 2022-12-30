@@ -1,4 +1,10 @@
+/*
+* Volumetric Renderer implementation as a project for PGPa, 2MIT, VUT FIT
+* Author: Boris Burkalo (xburka00), 2MIT
+*/
+
 #pragma once
+
 #include <set>
 #include <filesystem>
 #include <fstream>
@@ -25,6 +31,7 @@ public:
     void Bind();
     void Unbind() const;
     void UpdateSPSlice(SliceAxis sliceAxis, int sliceId);
+    void UpdateFromBin(const std::string& path, const glm::vec3& dimensions);
 
     std::unique_ptr<SurfacePlane> surfacePlaneZ;
     std::unique_ptr<SurfacePlane> surfacePlaneY;

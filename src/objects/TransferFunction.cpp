@@ -1,3 +1,11 @@
+/*
+* Volumetric Renderer implementation as a project for PGPa, 2MIT, VUT FIT
+* Author: Boris Burkalo (xburka00), 2MIT
+*
+* The code for the Cubic Spline and Transfer Function is inspired by/taken from:
+* https://github.com/jose-villegas/VolumeRendering, Author: jose-villegas
+*/
+
 #include "TransferFunction.h"
 
 TransferFunction::TransferFunction(std::string type)
@@ -22,7 +30,7 @@ TransferFunction::TransferFunction(std::string type)
     {
         colorPoints = std::vector {
             glm::vec4(1.0f, 1.0f, 1.0f, 41.153),
-            glm::vec4(0.f, 255.f/255.f, 7.f/255.f, 208),
+            glm::vec4(0.f, 255.f/255.f, 7.f/255.f, 60),
             glm::vec4(245.f/255.f, 0.f, 253.f/255.f, 85),
             glm::vec4(217.f/255.f, 222.f/255.f, 255.f/255.f, 134),
             glm::vec4(255.f/255.f, 217.f/255.f, 239.f/255.f, 255),
@@ -50,32 +58,6 @@ TransferFunction::TransferFunction(std::string type)
             glm::vec2(0.974f, 255),
         };
     }
-    
-
-    
-
-    /*
-    alphaPoints = std::vector{
-        glm::vec2(0.0f, 0),
-        glm::vec2(0.0f, 40),
-        glm::vec2(0.05f, 63),
-        glm::vec2(0.0f, 80),
-        glm::vec2(0.9f, 82),
-        glm::vec2(1.f, 255),
-    };
-    */
-
-    /*
-    alphaPoints = std::vector{
-        glm::vec2(0.0f, 0),
-        glm::vec2(0.0f, 80),
-        glm::vec2(0.9f, 82),
-        glm::vec2(1.f, 255),
-    };
-    */
-
-    
-    
 }
 
 TransferFunction::TransferFunction(std::vector<glm::vec4> colorPoints, std::vector<glm::vec2> alphaPoints)
@@ -153,7 +135,6 @@ void TransferFunction::createTexture()
         transferFunc[i] = getColor((float)i / (float)255);
     }
     
-    // create 1D texture
     glGenTextures(1, &transferFuncTexID);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_1D, transferFuncTexID);
@@ -173,19 +154,7 @@ std::vector<CubicSpline> TransferFunction::CalculateCubicSpline(std::vector<glm:
     std::vector<glm::vec3> D(n + 1);
 
     int i;
-    /* We need to solve the equation
-    * taken from: http://mathworld.wolfram.com/CubicSpline.html
-    [2 1       ] [D[0]]   [3(v[1] - v[0])  ]
-    |1 4 1     | |D[1]|   |3(v[2] - v[0])  |
-    |  1 4 1   | | .  | = |      .         |
-    |    ..... | | .  |   |      .         |
-    |     1 4 1| | .  |   |3(v[n] - v[n-2])|
-    [       1 2] [D[n]]   [3(v[n] - v[n-1])]
-    by converting the matrix to upper triangular.
-    The D[i] are the derivatives at the control points.
-    */
 
-    // build coeffs of the matrix
     gamma[0] = glm::vec3(0);
     gamma[0].x = 1.0f / 2.0f;
     gamma[0].y = 1.0f / 2.0f;
@@ -206,7 +175,6 @@ std::vector<CubicSpline> TransferFunction::CalculateCubicSpline(std::vector<glm:
     for (i = n - 1; i >= 0; i--)
         D[i] = delta[i] - gamma[i] * D[i + 1];
 
-    // compute the coeffs of the cubics
     std::vector<CubicSpline> C(n);
 
     for (i = 0; i < n; i++)
@@ -234,10 +202,36 @@ void TransferFunction::Unbind()
 
 void TransferFunction::setColorPointAtIdx(int id, glm::vec4 values)
 {
+    if (id < colorPoints.size() - 1)
+    {
+        float succVal = colorPoints[id + 1].a;
+        if (values.a > succVal)
+            return;
+    }
+
+    if (id > 0)
+    {
+        float lowVal = colorPoints[id - 1].a;
+        if (values.a < lowVal)
+            return;
+    }
     colorPoints[id] = values;
 }
 
 void TransferFunction::setAlphaPointAtIdx(int id, glm::vec2 values)
 {
+    if (id < alphaPoints.size() - 1)
+    {
+        float succVal = alphaPoints[id + 1].y;
+        if (values.y > succVal)
+            return;
+    }
+
+    if (id > 0)
+    {
+        float lowVal = alphaPoints[id - 1].y;
+        if (values.y < lowVal)
+            return;
+    }
     alphaPoints[id] = values;
 }

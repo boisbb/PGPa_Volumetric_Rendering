@@ -1,3 +1,8 @@
+/*
+* Volumetric Renderer implementation as a project for PGPa, 2MIT, VUT FIT
+* Author: Boris Burkalo (xburka00), 2MIT
+*/
+
 #include "SurfacePlane.h"
 
 std::vector<Vertex> surfacePlaneVertices {
@@ -52,4 +57,9 @@ void SurfacePlane::Draw(Shader &shader, glm::vec3 scale)
 void SurfacePlane::UpdateSlice(std::vector<unsigned char> data)
 {
     m_Texture->Update(data);
+}
+
+void SurfacePlane::ReInitSlice(std::vector<unsigned char> data, glm::vec2 dims)
+{
+    m_Texture->ReInit(data, dims);
 }

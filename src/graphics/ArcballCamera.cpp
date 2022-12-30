@@ -1,9 +1,15 @@
+/*
+* Volumetric Renderer implementation as a project for PGPa, 2MIT, VUT FIT
+* Author: Boris Burkalo (xburka00), 2MIT
+* 
+* Some of the code in this file was inspired by:
+* https://oguz81.github.io/ArcballCamera/, Author: oguz81
+*/
+
 #include "ArcballCamera.h"
 #include "ArcballCamera.h"
 #include "ArcballCamera.h"
 
-// https://github.com/oguz81/ArcballCamera/blob/main/main.cpp
-// https://oguz81.github.io/ArcballCamera/
 
 ArcballCamera::ArcballCamera(int width, int height, glm::vec3 position, glm::vec3 orientation, glm::vec3 up)
     : c_Width(width), c_Height(height), c_Position(position), c_Orientation(orientation), c_Up(up)
@@ -26,7 +32,7 @@ void ArcballCamera::updateMatrix(float FOVdeg, float nearPlane, float farPlane)
 }
 
 
-void ArcballCamera::Input(GLFWwindow* window) 
+void ArcballCamera::Input(GLFWwindow* window, glm::ivec2 windowOffset) 
 {   
     ImGuiIO& io = ImGui::GetIO();
     if (io.WantCaptureMouse)
@@ -38,25 +44,27 @@ void ArcballCamera::Input(GLFWwindow* window)
     if (watchCursorPos)
     {
         glfwGetCursorPos(window, &currPosX, &currPosY);
-        if (currPosX <= c_Width && currPosY <= c_Height)
+        if (currPosX >= windowOffset.x && currPosY >= windowOffset.y && currPosX <= c_Width + windowOffset.x && currPosY <= c_Height + windowOffset.y)
         {
             if ((currPosX != prevMousePosX || currPosY != prevMousePosY))
             {
-            std::cout << "Previous: " << prevMousePosX << " " << prevMousePosY << std::endl;
-            std::cout << "Current: " << currPosX << " " << currPosY << std::endl;
+                currPosX -= windowOffset.x;
+                currPosY -= windowOffset.y;
+                double tempPrevMousePosX = prevMousePosX -  windowOffset.x;
+                double tempPrevMousePosY = prevMousePosY -  windowOffset.y;
+                
+                glm::vec3 startPos;
+                // convert to NDC
+                startPos.x = ((tempPrevMousePosX - (c_Width / 2)) / (c_Width / 2)) * c_Radius;
+                startPos.y = (((c_Height / 2) - tempPrevMousePosY) / (c_Height / 2)) * c_Radius;
+                startPos.z = GetZCoord(startPos.x, startPos.y);
 
-            glm::vec3 startPos;
-            // convert to NDC
-            startPos.x = ((prevMousePosX - (c_Width / 2)) / (c_Width / 2)) * c_Radius;
-            startPos.y = (((c_Height / 2) - prevMousePosY) / (c_Height / 2)) * c_Radius;
-            startPos.z = GetZCoord(startPos.x, startPos.y);
+                glm::vec3 currentPos;
+                currentPos.x = ((currPosX - (c_Width / 2)) / (c_Width / 2)) * c_Radius;
+                currentPos.y = (((c_Height / 2) - currPosY) / (c_Height / 2)) * c_Radius;
+                currentPos.z = GetZCoord(currentPos.x, currentPos.y);
 
-            glm::vec3 currentPos;
-            currentPos.x = ((currPosX - (c_Width / 2)) / (c_Width / 2)) * c_Radius;
-            currentPos.y = (((c_Height / 2) - currPosY) / (c_Height / 2)) * c_Radius;
-            currentPos.z = GetZCoord(currentPos.x, currentPos.y);
-
-            QuaternionRotate(startPos, currentPos);
+                QuaternionRotate(startPos, currentPos);
 
             }
         }
@@ -93,7 +101,7 @@ void ArcballCamera::Input(GLFWwindow* window)
             double newPrevMousePosX, newPrevMousePosY;
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
             glfwGetCursorPos(window, &newPrevMousePosX, &newPrevMousePosY);
-            if (newPrevMousePosX <= c_Width && newPrevMousePosY <= c_Height)
+            if (newPrevMousePosX >= windowOffset.x && newPrevMousePosY >= windowOffset.y && newPrevMousePosX <= c_Width + windowOffset.x && newPrevMousePosY <= c_Height + windowOffset.y)
             {
                 prevMousePosX = newPrevMousePosX;
                 prevMousePosY = newPrevMousePosY;
@@ -101,11 +109,6 @@ void ArcballCamera::Input(GLFWwindow* window)
             }
 
         }
-        //if (firstClick)
-        //{
-        //    glfwSetCursorPos(window, (c_Width / 2), (c_Height / 2));
-        //    firstClick = false;
-        //}
     }
     else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && watchCursorPos
     ){
@@ -134,20 +137,6 @@ void ArcballCamera::QuaternionRotate(glm::vec3 startPos, glm::vec3 currentPos)
     currentQuaternion.axis.z = currentQuaternion.axis.z * sin((theta / 2) * 3.1416 / 180);
 
     cosValue2 = (currentQuaternion.cosine * lastQuaternion.cosine) - glm::dot(currentQuaternion.axis, lastQuaternion.axis);
-
-    /*
-    std::cout << "quatcos: " << currentQuaternion.cosine << std::endl;
-    std::cout << "quat: " << currentQuaternion.axis.x << std::endl;
-    std::cout << "quat: " << currentQuaternion.axis.y << std::endl;
-    std::cout << "quat: " << currentQuaternion.axis.z << std::endl;
-
-    std::cout << "lastquatcos: " << lastQuaternion.cosine << std::endl;
-    std::cout << "lastquat: " << lastQuaternion.axis.x << std::endl;
-    std::cout << "lastquat: " << lastQuaternion.axis.y << std::endl;
-    std::cout << "lastquat: " << lastQuaternion.axis.z << std::endl;
-
-    std::cout << "quat: " << cosValue2 << std::endl << std::endl;
-    */
 
     glm::vec3 tempVec = glm::cross(currentQuaternion.axis, lastQuaternion.axis);
     rotationalAxis2.x = (currentQuaternion.cosine * lastQuaternion.axis.x) + (lastQuaternion.cosine * currentQuaternion.axis.x) + tempVec.x;

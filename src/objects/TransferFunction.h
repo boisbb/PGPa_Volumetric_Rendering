@@ -1,3 +1,11 @@
+/*
+* Volumetric Renderer implementation as a project for PGPa, 2MIT, VUT FIT
+* Author: Boris Burkalo (xburka00), 2MIT
+*
+* The code for the Cubic Spline and Transfer Function is inspired by/taken from:
+* https://github.com/jose-villegas/VolumeRendering, Author: jose-villegas
+*/
+
 #pragma once
 
 #include <glm/glm.hpp>

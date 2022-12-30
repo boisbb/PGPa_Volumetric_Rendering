@@ -1,3 +1,8 @@
+/*
+* Volumetric Renderer implementation as a project for PGPa, 2MIT, VUT FIT
+* Author: Boris Burkalo (xburka00), 2MIT
+*/
+
 #pragma once
 
 #include <GL/glew.h>
@@ -30,7 +35,7 @@ public:
     ~ArcballCamera() {}
 
     void updateMatrix(float FOVdeg, float nearPlane, float farPlane);
-    void Input(GLFWwindow* window);
+    void Input(GLFWwindow* window, glm::ivec2 windowOffset);
     void Matrix(Shader& shader, const char* uniform);
 
 

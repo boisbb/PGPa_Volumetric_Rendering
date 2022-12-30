@@ -1,3 +1,8 @@
+/*
+* Volumetric Renderer implementation as a project for PGPa, 2MIT, VUT FIT
+* Author: Boris Burkalo (xburka00), 2MIT
+*/
+
 #pragma once
 
 #include <functional>
@@ -6,6 +11,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include "glm/glm.hpp"
 
 namespace test_model {
     
@@ -17,25 +23,7 @@ namespace test_model {
         virtual void OnUpdate(float deltaTime) {}
         virtual void OnRender() {}
         virtual void OnImGuiRender() {}
-        virtual void ModelReinit(int width, int height) {}
-
-
-        std::vector<std::string> getSkyboxFaces(std::string skyboxName)
-        {
-            std::vector<std::string> faces1
-            {
-                "res/textures/skyboxes/" + skyboxName + "_posx.jpg",
-                "res/textures/skyboxes/" + skyboxName + "_negx.jpg",
-                "res/textures/skyboxes/" + skyboxName + "_posy.jpg",
-                "res/textures/skyboxes/" + skyboxName + "_negy.jpg",
-                "res/textures/skyboxes/" + skyboxName + "_posz.jpg",
-                "res/textures/skyboxes/" + skyboxName + "_negz.jpg"
-            };
-
-            return faces1;
-
-
-        }
+        virtual void OnWindowResize(glm::vec2 size) {}
 
 
     };
@@ -44,19 +32,18 @@ namespace test_model {
     public:
         TestModelMenu(TestModel*& currentTestModelPointer);
 
+        void OnWindowResize(glm::vec2 size) override;
         void OnImGuiRender() override;
         TestModel* SetTestModel(const char* testModelName);
 
         template<typename T>
         void RegisterTestModel(const std::string& name){
-            std::cout << "Registering test_model " << name << std::endl;
 
             m_TestModels.push_back(std::make_pair(name, []() { return new T(); }));
         }
 
         template<typename T>
         void RegisterTestModel(const std::string& name, GLFWwindow* window, int width, int height){
-            std::cout << "Registering test_model " << name << std::endl;
 
             m_TestModels.push_back(std::make_pair(name, [window, width, height]() { return new T(window, width, height); }));
         }

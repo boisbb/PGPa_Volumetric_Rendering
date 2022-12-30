@@ -1,3 +1,8 @@
+/*
+* Volumetric Renderer implementation as a project for PGPa, 2MIT, VUT FIT
+* Author: Boris Burkalo (xburka00), 2MIT
+*/
+
 #pragma once
 
 #include <vector>
@@ -19,6 +24,7 @@ public:
 
     void Draw(Shader &shader, glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f));
     void UpdateSlice(std::vector<unsigned char> data);
+    void ReInitSlice(std::vector<unsigned char> data, glm::vec2 dims);
 private:
     std::vector<Vertex> m_Vertices;
     std::vector<unsigned int> m_Indices;

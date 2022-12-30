@@ -1,3 +1,8 @@
+/*
+* Volumetric Renderer implementation as a project for PGPa, 2MIT, VUT FIT
+* Author: Boris Burkalo (xburka00), 2MIT
+*/
+
 #pragma once
 
 #include <GL/glew.h>
@@ -30,6 +35,7 @@ namespace test_model {
         void OnUpdate(float deltaTime) override;
         void OnRender() override;
         void OnImGuiRender() override;
+        void OnWindowResize(glm::vec2 size) override;
     private:
         void TakeScreenshot();
 
@@ -55,17 +61,17 @@ namespace test_model {
         glm::ivec2 currentWindowSize;
         float intensityThresh = 0.3;
         float stepLen = 0.001;
-        float gamma = 0.4;
-        float dither_ratio = 1.f;
-        int sliceZIdx;
-        int sliceYIdx;
-        int sliceXIdx;
+        glm::ivec3 sliceIndices;
 
         float pixelOffset = 0;
+        glm::ivec2 windowOffset{0, 0};
 
         bool takeScreenshot = false;
         bool splitScreen = false;
 
-        GLuint vbo;
+        std::string currentModel;
+        std::string currentTransferFunc;
+        glm::vec3 currentModelSize;
+        glm::vec3 currentModelSizeNorm;
     };
 }
