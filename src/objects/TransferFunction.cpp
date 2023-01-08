@@ -29,17 +29,17 @@ TransferFunction::TransferFunction(std::string type)
     else if (type == "teapot")
     {
         colorPoints = std::vector {
-            glm::vec4(1.0f, 1.0f, 1.0f, 41.153),
-            glm::vec4(0.f, 255.f/255.f, 7.f/255.f, 60),
-            glm::vec4(245.f/255.f, 0.f, 253.f/255.f, 85),
-            glm::vec4(217.f/255.f, 222.f/255.f, 255.f/255.f, 134),
+            glm::vec4(1.0f, 1.0f, 1.0f, 0.f),
+            glm::vec4(0.f, 255.f/255.f, 7.f/255.f, 50.726),
+            glm::vec4(245.f/255.f, 0.f, 253.f/255.f, 56.514),
+            glm::vec4(217.f/255.f, 222.f/255.f, 255.f/255.f, 173.676),
             glm::vec4(255.f/255.f, 217.f/255.f, 239.f/255.f, 255),
         };
 
         alphaPoints = std::vector{
-            glm::vec2(0.978f, 0),
-            glm::vec2(0.995f, 17.647),
-            glm::vec2(0.965f, 255),
+            glm::vec2(1.f, 0),
+            glm::vec2(0.957f, 249.042),
+            glm::vec2(0.870, 255),
         };
     }
     else

@@ -7,6 +7,7 @@
 // Some parts of this shader are inspired by/taken from:
 // https://github.com/jose-villegas/VolumeRendering/blob/master/VolumeRendering/shaders/raycast.frag, Author: jose-villegas
 // https://martinopilia.com/posts/2018/09/17/volume-raycasting.html, Author: Martino Pilia
+// https://www.marcusbannerman.co.uk/articles/VolumeRendering.html, Author: Marcus Bannerman
 
 layout(location = 0) in vec3 a_Pos;
 
