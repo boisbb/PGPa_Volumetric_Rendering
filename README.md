@@ -24,6 +24,7 @@ make
 
 ## Previews
 Previews from the solution:
+
 ![rot](doc/rotation.gif "rotate")
 ![tf](doc/tf.gif "tf")
 ![sampling](doc/sampling.gif "sampling")
