@@ -3,6 +3,8 @@ This application is a solution for rendering small volumetric datasets using C++
 
 For further info please read the documentation file in the `doc` folder.
 
+(Project created as part of PGPa course on BUT, FIT. 30/30pts)
+
 ## Running the program
 In the repository there is a `CMakeLists.txt` file included. Please make sure that you have installed the required libraries which are:
  - [glfw](https://www.glfw.org/)
@@ -22,5 +24,8 @@ make
 
 ## Previews
 Previews from the solution:
+![rot](doc/rotation.gif "rotate")
+![tf](doc/tf.gif "tf")
+![sampling](doc/sampling.gif "sampling")
 ![Sample1](doc/merged_sample.png "Sample1")
 ![Sample2](doc/foot.png "Sample2")
