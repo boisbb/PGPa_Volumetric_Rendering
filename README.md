@@ -1,5 +1,5 @@
 # Rendering of volumetric data
-This application is a solution for rendering small volumetric datasets using C++ and OpenGL. It implements a Single-pass volumetric raycasting introduced (here)[https://martinopilia.com/posts/2018/09/17/volume-raycasting.html] (and other various sources such as [this](https://github.com/jose-villegas/VolumeRendering) repository).
+This application is a solution for rendering small volumetric datasets using C++ and OpenGL. It implements a Single-pass volumetric raycasting introduced [here](https://martinopilia.com/posts/2018/09/17/volume-raycasting.html) (and other various sources such as [this](https://github.com/jose-villegas/VolumeRendering) repository).
 
 For further info please read the documentation file in the `doc` folder.
 
